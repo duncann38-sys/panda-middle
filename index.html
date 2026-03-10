@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Panda — Your Social Life Shouldn't Wait for Payday</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --g:#3DBE6C;
+  --g2:#2da85a;
+  --glow:rgba(61,190,108,0.35);
+  --dark:#060a06;
+  --dark2:#0a0f0a;
+  --white:#f4f9f4;
+}
+
+html{scroll-behavior:smooth}
+
+body{
+  background:var(--dark);
+  color:var(--white);
+  font-family:'DM Sans',sans-serif;
+  overflow-x:hidden;
+  cursor:none;
+}
+
+/* ── CUSTOM CURSOR ── */
+#cursor{
+  position:fixed;width:12px;height:12px;
+  background:var(--g);border-radius:50%;
+  pointer-events:none;z-index:9999;
+  transform:translate(-50%,-50%);
+  transition:width .2s,height .2s,background .2s;
+  mix-blend-mode:difference;
+}
+#cursor-ring{
+  position:fixed;width:36px;height:36px;
+  border:1.5px solid rgba(61,190,108,0.5);
+  border-radius:50%;pointer-events:none;z-index:9998;
+  transform:translate(-50%,-50%);
+  transition:all .12s ease;
+}
+
+/* ── NOISE OVERLAY ── */
+body::after{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity:0.028;pointer-events:none;z-index:9000;
+}
+
+/* ── HERO ── */
+#hero{
+  position:relative;min-height:100vh;
+  display:grid;place-items:center;
+  overflow:hidden;
+  padding:0 24px;
+}
+
+/* bg canvas */
+#bg-canvas{
+  position:absolute;inset:0;width:100%;height:100%;
+}
+
+/* radial green glow */
+#hero::before{
+  content:'';position:absolute;
+  width:900px;height:900px;
+  background:radial-gradient(circle, rgba(61,190,108,0.07) 0%, transparent 70%);
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  pointer-events:none;
+}
+
+/* ── HERO INNER ── */
+.hero-inner{
+  position:relative;z-index:10;
+  max-width:1100px;width:100%;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:60px;align-items:center;
+  padding:100px 0 80px;
+}
+@media(max-width:860px){
+  .hero-inner{grid-template-columns:1fr;gap:48px;padding:80px 0 60px;text-align:center}
+  .hero-right{order:-1}
+}
+
+/* ── LEFT COPY ── */
+.hero-left{}
+
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(61,190,108,0.08);
+  border:1px solid rgba(61,190,108,0.2);
+  border-radius:100px;padding:6px 14px;
+  font-size:0.68rem;font-weight:600;letter-spacing:0.18em;
+  text-transform:uppercase;color:var(--g);
+  margin-bottom:24px;
+  animation:fadeUp .8s ease both;
+}
+.hero-eyebrow .dot{
+  width:6px;height:6px;background:var(--g);
+  border-radius:50%;animation:pulse-dot 2s ease-in-out infinite;
+}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+
+.hero-h1{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(2.6rem,5.5vw,4.8rem);
+  font-weight:800;line-height:1.0;
+  letter-spacing:-0.04em;
+  margin-bottom:8px;
+  animation:fadeUp .8s .1s ease both;
+}
+.hero-h1 .line1{display:block;color:var(--white)}
+.hero-h1 .line2{
+  display:block;
+  font-family:'Instrument Serif',serif;
+  font-style:italic;font-weight:400;
+  color:var(--g);
+  font-size:1.15em;
+  text-shadow:0 0 60px rgba(61,190,108,0.4);
+}
+
+.hero-sub{
+  font-size:1.05rem;color:rgba(255,255,255,0.45);
+  line-height:1.75;max-width:440px;
+  margin:20px 0 32px;
+  font-weight:300;letter-spacing:0.01em;
+  animation:fadeUp .8s .2s ease both;
+}
+@media(max-width:860px){.hero-sub{margin-left:auto;margin-right:auto}}
+
+/* ── VENUE PILLS ── */
+.venue-strip{
+  display:flex;flex-wrap:wrap;gap:8px;
+  margin-bottom:32px;
+  animation:fadeUp .8s .25s ease both;
+}
+@media(max-width:860px){.venue-strip{justify-content:center}}
+.venue-pill{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:100px;padding:5px 12px;
+  font-size:0.72rem;color:rgba(255,255,255,0.5);
+  transition:all .25s;
+}
+.venue-pill:hover{
+  background:rgba(61,190,108,0.08);
+  border-color:rgba(61,190,108,0.25);
+  color:var(--g);transform:translateY(-2px);
+}
+
+/* ── CTA BUTTONS ── */
+.hero-ctas{
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  animation:fadeUp .8s .3s ease both;
+}
+@media(max-width:860px){.hero-ctas{justify-content:center}}
+
+.btn-primary{
+  font-family:'Syne',sans-serif;
+  font-size:0.92rem;font-weight:800;
+  padding:16px 32px;border-radius:100px;
+  background:var(--g);color:#fff;
+  border:none;cursor:none;
+  position:relative;overflow:hidden;
+  letter-spacing:0.02em;
+  box-shadow:0 0 0 0 rgba(61,190,108,0.4);
+  transition:transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .25s;
+  text-decoration:none;display:inline-block;
+}
+.btn-primary::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,0.15),transparent);
+}
+.btn-primary::after{
+  content:'';position:absolute;
+  top:0;left:-100%;width:60%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);
+  animation:shimmer 3s ease-in-out infinite 1s;
+}
+.btn-primary:hover{
+  transform:translateY(-4px) scale(1.03);
+  box-shadow:0 16px 40px rgba(61,190,108,0.45);
+}
+@keyframes shimmer{0%{left:-100%}100%{left:200%}}
+
+.btn-secondary{
+  font-size:0.88rem;font-weight:500;
+  color:rgba(255,255,255,0.45);
+  background:none;border:none;cursor:none;
+  display:flex;align-items:center;gap:6px;
+  transition:color .2s;letter-spacing:0.02em;
+  text-decoration:none;
+}
+.btn-secondary:hover{color:var(--white)}
+.btn-secondary svg{transition:transform .2s}
+.btn-secondary:hover svg{transform:translateX(4px)}
+
+/* ── STATS ROW ── */
+.hero-stats{
+  display:flex;gap:32px;margin-top:44px;
+  animation:fadeUp .8s .4s ease both;
+}
+@media(max-width:860px){.hero-stats{justify-content:center}}
+.stat{}
+.stat-n{
+  font-family:'Syne',sans-serif;
+  font-size:1.8rem;font-weight:800;
+  color:var(--g);display:block;line-height:1;
+  letter-spacing:-0.03em;
+}
+.stat-l{
+  font-size:0.65rem;color:rgba(255,255,255,0.3);
+  text-transform:uppercase;letter-spacing:0.12em;
+  margin-top:3px;display:block;
+}
+.stat-div{width:1px;background:rgba(255,255,255,0.08);align-self:stretch}
+
+/* ── RIGHT — CARD SCENE ── */
+.hero-right{
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+  animation:fadeUp .8s .15s ease both;
+}
+
+.card-scene{
+  position:relative;
+  width:340px;height:340px;
+  perspective:800px;
+}
+@media(max-width:860px){.card-scene{width:280px;height:280px}}
+
+/* orbiting rings */
+.orbit{
+  position:absolute;inset:0;border-radius:50%;
+  border:1px solid rgba(61,190,108,0.1);
+  animation:spin linear infinite;
+}
+.orbit-1{animation-duration:20s;inset:-20px}
+.orbit-2{animation-duration:32s;animation-direction:reverse;inset:-50px;border-color:rgba(61,190,108,0.06)}
+.orbit-3{animation-duration:48s;inset:-90px;border-color:rgba(61,190,108,0.04)}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+/* orbit dots */
+.orbit-dot{
+  position:absolute;width:8px;height:8px;
+  background:var(--g);border-radius:50%;
+  box-shadow:0 0 12px var(--g);
+  top:50%;left:50%;
+}
+.orbit-1 .orbit-dot{
+  transform:translate(-50%,-50%) translateX(160px);
+}
+@media(max-width:860px){
+  .orbit-1 .orbit-dot{transform:translate(-50%,-50%) translateX(130px)}
+}
+
+/* emoji orbiters */
+.orbit-emoji{
+  position:absolute;font-size:1.2rem;
+  top:50%;left:50%;
+  transform-origin:0 0;
+  animation:orbit-emoji linear infinite;
+}
+@keyframes orbit-emoji{
+  from{transform:rotate(var(--start)) translateX(var(--r)) rotate(calc(-1 * var(--start)))}
+  to{transform:rotate(calc(var(--start) + 360deg)) translateX(var(--r)) rotate(calc(-1 * (var(--start) + 360deg)))}
+}
+
+/* THE CARD */
+.card-wrap{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:260px;
+  transform-style:preserve-3d;
+  transition:transform .1s ease;
+}
+@media(max-width:860px){.card-wrap{width:220px}}
+
+.panda-card{
+  width:100%;
+  aspect-ratio:1.586/1;
+  border-radius:16px;
+  background:linear-gradient(135deg, #0d1f0d 0%, #152415 40%, #0f1a0f 100%);
+  border:1px solid rgba(61,190,108,0.3);
+  padding:20px;
+  position:relative;overflow:hidden;
+  box-shadow:
+    0 30px 80px rgba(0,0,0,0.8),
+    0 0 0 1px rgba(61,190,108,0.1),
+    0 0 60px rgba(61,190,108,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.06);
+  transform-style:preserve-3d;
+}
+
+/* card shine */
+.card-shine{
+  position:absolute;inset:0;border-radius:16px;
+  background:linear-gradient(135deg,rgba(255,255,255,0.06) 0%,transparent 60%);
+  pointer-events:none;
+}
+.card-shine::after{
+  content:'';position:absolute;inset:0;border-radius:16px;
+  background:linear-gradient(225deg,rgba(61,190,108,0.08) 0%,transparent 50%);
+}
+
+/* card holographic streak */
+.card-holo{
+  position:absolute;inset:0;border-radius:16px;overflow:hidden;
+  pointer-events:none;
+}
+.card-holo::before{
+  content:'';position:absolute;
+  width:200%;height:200%;
+  background:conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    rgba(61,190,108,0.04) 30deg,
+    rgba(180,255,120,0.06) 60deg,
+    transparent 90deg,
+    transparent 180deg,
+    rgba(61,190,108,0.03) 210deg,
+    transparent 270deg
+  );
+  top:-50%;left:-50%;
+  animation:holo-spin 8s linear infinite;
+}
+@keyframes holo-spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+
+/* card chip */
+.card-chip{
+  position:absolute;top:18px;left:20px;
+  width:32px;height:24px;
+  background:linear-gradient(135deg,#c8a84b,#f0d060,#a07830);
+  border-radius:4px;
+  display:grid;place-items:center;
+  box-shadow:0 2px 8px rgba(0,0,0,0.4);
+}
+.card-chip::after{
+  content:'';width:18px;height:14px;
+  border:1px solid rgba(0,0,0,0.2);
+  border-radius:2px;
+}
+
+/* mastercard circles */
+.card-mc{
+  position:absolute;top:16px;right:18px;
+  display:flex;
+}
+.mc-c{
+  width:24px;height:24px;border-radius:50%;
+  opacity:0.85;
+}
+.mc-c:first-child{background:#eb001b;margin-right:-8px}
+.mc-c:last-child{background:#f79e1b}
+
+/* card number */
+.card-number{
+  position:absolute;
+  bottom:42px;left:20px;right:20px;
+  font-family:'Syne',sans-serif;
+  font-size:0.7rem;font-weight:700;
+  letter-spacing:0.22em;color:rgba(255,255,255,0.55);
+  display:flex;gap:8px;
+}
+
+/* card bottom */
+.card-bottom{
+  position:absolute;bottom:14px;left:20px;right:20px;
+  display:flex;justify-content:space-between;align-items:flex-end;
+}
+.card-name{
+  font-family:'Syne',sans-serif;
+  font-size:0.62rem;font-weight:700;
+  letter-spacing:0.14em;text-transform:uppercase;
+  color:rgba(255,255,255,0.5);
+}
+.card-amount{
+  font-family:'Syne',sans-serif;
+  font-size:1.1rem;font-weight:800;
+  color:var(--g);letter-spacing:-0.02em;
+  text-shadow:0 0 20px rgba(61,190,108,0.5);
+}
+
+/* card panda watermark */
+.card-watermark{
+  position:absolute;
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  font-size:4rem;opacity:0.04;
+  user-select:none;pointer-events:none;
+}
+
+/* card glow pulse */
+.card-wrap::after{
+  content:'';
+  position:absolute;top:50%;left:50%;
+  width:260px;height:164px;
+  transform:translate(-50%,-50%);
+  border-radius:16px;
+  background:var(--g);
+  filter:blur(40px);
+  opacity:0;
+  animation:card-glow-pulse 4s ease-in-out infinite;
+  z-index:-1;
+}
+@keyframes card-glow-pulse{
+  0%,100%{opacity:0.06}
+  50%{opacity:0.14}
+}
+
+/* floating label badges */
+.card-badge{
+  position:absolute;
+  background:rgba(10,15,10,0.9);
+  border:1px solid rgba(61,190,108,0.25);
+  border-radius:100px;
+  padding:6px 12px;
+  font-size:0.65rem;font-weight:600;
+  color:var(--g);letter-spacing:0.08em;
+  white-space:nowrap;
+  backdrop-filter:blur(8px);
+  box-shadow:0 8px 24px rgba(0,0,0,0.4);
+}
+.badge-1{
+  top:-14px;right:-20px;
+  animation:float1 4s ease-in-out infinite;
+}
+.badge-2{
+  bottom:10px;right:-32px;
+  animation:float1 4s ease-in-out infinite .8s;
+  color:rgba(255,255,255,0.6);border-color:rgba(255,255,255,0.1);
+}
+.badge-3{
+  bottom:-14px;left:-16px;
+  animation:float1 4s ease-in-out infinite 1.6s;
+}
+@keyframes float1{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-8px)}
+}
+
+/* ── HOW IT WORKS ── */
+#how{
+  position:relative;z-index:10;
+  max-width:1100px;margin:0 auto;
+  padding:80px 24px 100px;
+}
+
+.section-eyebrow{
+  text-align:center;
+  font-size:0.65rem;font-weight:700;letter-spacing:0.22em;
+  text-transform:uppercase;color:var(--g);
+  margin-bottom:14px;
+  display:flex;align-items:center;justify-content:center;gap:12px;
+}
+.section-eyebrow::before,.section-eyebrow::after{
+  content:'';width:40px;height:1px;background:rgba(61,190,108,0.3);
+}
+
+.section-title{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(2rem,4vw,3.2rem);
+  font-weight:800;letter-spacing:-0.03em;
+  text-align:center;color:var(--white);
+  margin-bottom:60px;line-height:1.1;
+}
+.section-title em{
+  font-family:'Instrument Serif',serif;
+  font-style:italic;font-weight:400;color:var(--g);
+}
+
+.steps-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:20px;
+  position:relative;
+}
+@media(max-width:700px){.steps-grid{grid-template-columns:1fr}}
+
+/* connector line */
+.steps-grid::before{
+  content:'';position:absolute;
+  top:52px;left:calc(16.66% + 20px);right:calc(16.66% + 20px);
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(61,190,108,0.2),rgba(61,190,108,0.4),rgba(61,190,108,0.2),transparent);
+  pointer-events:none;
+}
+@media(max-width:700px){.steps-grid::before{display:none}}
+
+.step-card{
+  background:rgba(255,255,255,0.02);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:20px;padding:28px 24px;
+  position:relative;overflow:hidden;
+  transition:border-color .3s,transform .3s,box-shadow .3s;
+  cursor:none;
+}
+.step-card:hover{
+  border-color:rgba(61,190,108,0.25);
+  transform:translateY(-6px);
+  box-shadow:0 24px 48px rgba(0,0,0,0.4), 0 0 0 1px rgba(61,190,108,0.1);
+}
+.step-card::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at 30% 30%, rgba(61,190,108,0.04) 0%, transparent 60%);
+  opacity:0;transition:opacity .3s;
+}
+.step-card:hover::before{opacity:1}
+
+.step-n{
+  font-family:'Syne',sans-serif;
+  font-size:3.5rem;font-weight:800;
+  color:rgba(61,190,108,0.08);
+  letter-spacing:-0.04em;
+  line-height:1;margin-bottom:16px;
+  display:block;
+}
+
+.step-icon{
+  width:48px;height:48px;
+  background:rgba(61,190,108,0.08);
+  border:1px solid rgba(61,190,108,0.15);
+  border-radius:12px;
+  display:grid;place-items:center;
+  font-size:1.4rem;margin-bottom:16px;
+}
+
+.step-title{
+  font-family:'Syne',sans-serif;
+  font-size:1rem;font-weight:800;
+  color:var(--white);margin-bottom:8px;
+  letter-spacing:-0.01em;
+}
+
+.step-desc{
+  font-size:0.82rem;color:rgba(255,255,255,0.4);
+  line-height:1.7;
+}
+.step-desc strong{color:rgba(255,255,255,0.7)}
+
+/* ── CREDIT BAR SECTION ── */
+#credit-section{
+  position:relative;z-index:10;
+  padding:0 24px 100px;
+}
+
+.credit-bar-wrap{
+  max-width:1100px;margin:0 auto;
+  background:linear-gradient(135deg, rgba(61,190,108,0.06) 0%, rgba(61,190,108,0.02) 100%);
+  border:1px solid rgba(61,190,108,0.15);
+  border-radius:24px;padding:48px;
+  display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;
+  position:relative;overflow:hidden;
+}
+@media(max-width:700px){.credit-bar-wrap{grid-template-columns:1fr;padding:32px 24px;gap:32px}}
+
+.credit-bar-wrap::before{
+  content:'';position:absolute;
+  top:-60px;right:-60px;
+  width:300px;height:300px;
+  background:radial-gradient(circle,rgba(61,190,108,0.06) 0%,transparent 70%);
+}
+
+.credit-left h2{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(1.6rem,3.5vw,2.6rem);
+  font-weight:800;letter-spacing:-0.03em;
+  color:var(--white);line-height:1.1;margin-bottom:12px;
+}
+.credit-left h2 span{color:var(--g)}
+.credit-left p{
+  font-size:0.88rem;color:rgba(255,255,255,0.4);
+  line-height:1.7;margin-bottom:24px;
+}
+
+/* repayment visual */
+.repay-visual{
+  display:flex;flex-direction:column;gap:10px;
+}
+.repay-row{
+  display:flex;align-items:center;gap:12px;
+}
+.repay-label{
+  font-size:0.68rem;font-weight:600;letter-spacing:0.1em;
+  text-transform:uppercase;color:rgba(255,255,255,0.3);
+  width:70px;flex-shrink:0;
+}
+.repay-bar{
+  flex:1;height:6px;background:rgba(255,255,255,0.06);
+  border-radius:3px;overflow:hidden;
+}
+.repay-fill{
+  height:100%;background:var(--g);border-radius:3px;
+  animation:fill-bar 1.5s cubic-bezier(.34,1.56,.64,1) both;
+  box-shadow:0 0 8px var(--g);
+}
+.repay-fill.delay1{animation-delay:.2s}
+.repay-fill.delay2{animation-delay:.4s}
+.repay-amount{
+  font-family:'Syne',sans-serif;
+  font-size:0.8rem;font-weight:700;
+  color:var(--g);width:40px;text-align:right;
+}
+@keyframes fill-bar{from{width:0}to{width:var(--w)}}
+
+.fee-note{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:10px;padding:10px 14px;
+  font-size:0.72rem;color:rgba(255,255,255,0.35);
+  margin-top:16px;
+}
+.fee-note strong{color:var(--g)}
+
+/* ── TICKER ── */
+.ticker-wrap{
+  overflow:hidden;
+  border-top:1px solid rgba(255,255,255,0.05);
+  border-bottom:1px solid rgba(255,255,255,0.05);
+  padding:14px 0;margin:0 -48px;
+  position:relative;
+}
+.ticker-wrap::before,.ticker-wrap::after{
+  content:'';position:absolute;top:0;bottom:0;width:60px;z-index:2;
+}
+.ticker-wrap::before{left:0;background:linear-gradient(90deg,rgba(10,15,10,0.8),transparent)}
+.ticker-wrap::after{right:0;background:linear-gradient(-90deg,rgba(10,15,10,0.8),transparent)}
+
+.ticker{
+  display:flex;gap:0;
+  animation:ticker 20s linear infinite;
+  white-space:nowrap;
+}
+.ticker-item{
+  display:flex;align-items:center;gap:10px;
+  padding:0 20px;
+  font-size:0.72rem;font-weight:600;letter-spacing:0.1em;
+  text-transform:uppercase;color:rgba(255,255,255,0.3);
+}
+.ticker-item span{color:var(--g)}
+.ticker-sep{color:rgba(61,190,108,0.3);font-size:0.5rem}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ── BOTTOM CTA ── */
+#bottom-cta{
+  position:relative;z-index:10;
+  padding:0 24px 100px;text-align:center;
+}
+.bottom-cta-inner{
+  max-width:600px;margin:0 auto;
+}
+.bottom-cta-inner h2{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(2rem,5vw,3.8rem);
+  font-weight:800;letter-spacing:-0.04em;
+  line-height:1.05;margin-bottom:16px;
+}
+.bottom-cta-inner h2 .serif{
+  font-family:'Instrument Serif',serif;
+  font-style:italic;font-weight:400;color:var(--g);
+}
+.bottom-cta-inner p{
+  font-size:0.95rem;color:rgba(255,255,255,0.4);
+  margin-bottom:32px;line-height:1.7;
+}
+.cta-group{
+  display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;
+}
+
+/* ── FADE UP ANIMATION ── */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(24px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.reveal{
+  opacity:0;transform:translateY(30px);
+  transition:opacity .7s ease, transform .7s ease;
+}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--dark)}
+::-webkit-scrollbar-thumb{background:rgba(61,190,108,0.3);border-radius:2px}
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- ═══════════════════════════════════════ HERO ═══ -->
+<section id="hero">
+  <canvas id="bg-canvas"></canvas>
+
+  <div class="hero-inner">
+
+    <!-- LEFT -->
+    <div class="hero-left">
+      <div class="hero-eyebrow">
+        <span class="dot"></span>
+        The Credit Layer for the Social Economy
+      </div>
+
+      <h1 class="hero-h1">
+        <span class="line1">Your social life</span>
+        <span class="line2">shouldn't wait.</span>
+      </h1>
+
+      <p class="hero-sub">
+        A £300 virtual Mastercard, locked to hospitality venues. 
+        Spend tonight. Repay in three easy instalments. 
+        <strong style="color:rgba(255,255,255,0.7)">No stress. No overdraft. No excuses.</strong>
+      </p>
+
+      <div class="venue-strip">
+        <div class="venue-pill">🍗 Nando's</div>
+        <div class="venue-pill">🍺 Wetherspoons</div>
+        <div class="venue-pill">📦 Boxpark</div>
+        <div class="venue-pill">🍝 Zizzi</div>
+        <div class="venue-pill">✨ Dishoom</div>
+        <div class="venue-pill">+ thousands more</div>
+      </div>
+
+      <div class="hero-ctas">
+        <a href="/waitlist" class="btn-primary">Join the Waitlist →</a>
+        <a href="#how" class="btn-secondary">
+          How it works
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      </div>
+
+      <div class="hero-stats">
+        <div class="stat">
+          <span class="stat-n" data-count="230">0</span>
+          <span class="stat-l">Waitlist members</span>
+        </div>
+        <div class="stat-div"></div>
+        <div class="stat">
+          <span class="stat-n" data-count="20">0</span>
+          <span class="stat-l">UK universities</span>
+        </div>
+        <div class="stat-div"></div>
+        <div class="stat">
+          <span class="stat-n">£300</span>
+          <span class="stat-l">Instant credit</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT — CARD -->
+    <div class="hero-right">
+      <div class="card-scene">
+
+        <!-- orbiting rings -->
+        <div class="orbit orbit-1"><div class="orbit-dot"></div></div>
+        <div class="orbit orbit-2"></div>
+        <div class="orbit orbit-3"></div>
+
+        <!-- emoji orbiters -->
+        <div class="orbit-emoji" style="--start:0deg;--r:150px;animation-duration:12s">🍗</div>
+        <div class="orbit-emoji" style="--start:72deg;--r:150px;animation-duration:12s">🍺</div>
+        <div class="orbit-emoji" style="--start:144deg;--r:150px;animation-duration:12s">🎉</div>
+        <div class="orbit-emoji" style="--start:216deg;--r:150px;animation-duration:12s">💳</div>
+        <div class="orbit-emoji" style="--start:288deg;--r:150px;animation-duration:12s">✨</div>
+
+        <!-- THE CARD -->
+        <div class="card-wrap" id="card-wrap">
+          <div class="panda-card">
+            <div class="card-shine"></div>
+            <div class="card-holo"></div>
+            <div class="card-watermark">🐼</div>
+
+            <div class="card-chip"></div>
+            <div class="card-mc">
+              <div class="mc-c"></div>
+              <div class="mc-c"></div>
+            </div>
+
+            <div class="card-number">
+              <span>••••</span><span>••••</span><span>••••</span><span>4242</span>
+            </div>
+
+            <div class="card-bottom">
+              <div>
+                <div class="card-name">Panda Credit</div>
+                <div style="font-size:0.55rem;color:rgba(255,255,255,0.25);letter-spacing:0.1em;margin-top:2px">HOSPITALITY ONLY</div>
+              </div>
+              <div class="card-amount">£300</div>
+            </div>
+          </div>
+
+          <!-- floating badges -->
+          <div class="card-badge badge-1">⚡ Instant Access</div>
+          <div class="card-badge badge-2">🔒 MCC Locked</div>
+          <div class="card-badge badge-3">✅ FCA Regulated</div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ HOW IT WORKS ═══ -->
+<section id="how">
+  <div class="section-eyebrow reveal">How it works</div>
+  <h2 class="section-title reveal">Three steps.<br/><em>That's genuinely it.</em></h2>
+
+  <div class="steps-grid">
+    <div class="step-card reveal">
+      <span class="step-n">01</span>
+      <div class="step-icon">📲</div>
+      <div class="step-title">Apply in seconds</div>
+      <p class="step-desc">Download the app, verify your identity. No credit score needed. <strong>Approval in under 60 seconds.</strong></p>
+    </div>
+    <div class="step-card reveal" style="transition-delay:.1s">
+      <span class="step-n">02</span>
+      <div class="step-icon">💳</div>
+      <div class="step-title">Get your card</div>
+      <p class="step-desc">Your virtual Mastercard appears instantly. <strong>£300 ready to spend</strong> at thousands of hospitality venues across the UK.</p>
+    </div>
+    <div class="step-card reveal" style="transition-delay:.2s">
+      <span class="step-n">03</span>
+      <div class="step-icon">🔄</div>
+      <div class="step-title">Repay in 3</div>
+      <p class="step-desc">Three equal payments of <strong>£100</strong>, every 30 days. One flat fee of <strong>£36.</strong> No hidden charges. No surprises.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ CREDIT SECTION ═══ -->
+<section id="credit-section">
+  <div class="credit-bar-wrap reveal">
+
+    <!-- ticker -->
+    <div class="ticker-wrap" style="grid-column:1/-1;margin-bottom:32px">
+      <div class="ticker">
+        <div class="ticker-item">Nando's <span>✓</span></div>
+        <div class="ticker-item ticker-sep">◆</div>
+        <div class="ticker-item">Wetherspoons <span>✓</span></div>
+        <div class="ticker-item ticker-sep">◆</div>
+        <div class="ticker-item">Boxpark <span>✓</span></div>
+        <div class="ticker-item ticker-sep">◆</div>
+        <div class="ticker-item">Zizzi <span>✓</span></div>
+        <div class="ticker-item ticker-sep">◆</div>
+        <div class="ticker-item">Dishoom <span>✓</span></div>
+        <div class="ticker-item ticker-sep">◆</div>
+        <div class="ticker-item">Wagamama <span>✓</span></div>
+        <div class="ticker-item ticker-sep">◆</div>
+        <div class="ticker-item">Revolution <span>✓</span></div>
+        <div class="ticker-item ticker-sep">◆</div>
+        <div class="ticker-item">All Bar One <span>✓</span></div>
+        <div class="ticker-item ticker-sep">◆</div>
+        <!-- duplicate for seamless loop -->
+        <div class="ticker-item">Nando's <span>✓</span></div>
+        <div class="ticker-item ticker-sep">◆</div>
+        <div class="ticker-item">Wetherspoons <span>✓</span></div>
+        <div class="ticker-item ticker-sep">◆</div>
+        <div class="ticker-item">Boxpark <span>✓</span></div>
+        <div class="ticker-item ticker-sep">◆</div>
+        <div class="ticker-item">Zizzi <span>✓</span></div>
+        <div class="ticker-item ticker-sep">◆</div>
+        <div class="ticker-item">Dishoom <span>✓</span></div>
+        <div class="ticker-item ticker-sep">◆</div>
+        <div class="ticker-item">Wagamama <span>✓</span></div>
+        <div class="ticker-item ticker-sep">◆</div>
+        <div class="ticker-item">Revolution <span>✓</span></div>
+        <div class="ticker-item ticker-sep">◆</div>
+        <div class="ticker-item">All Bar One <span>✓</span></div>
+        <div class="ticker-item ticker-sep">◆</div>
+      </div>
+    </div>
+
+    <div class="credit-left">
+      <h2>Repay on <span>your</span> terms.</h2>
+      <p>Split into three equal payments. First one 30 days after you spend. No compound interest. No late fee spirals. Just one simple, flat charge.</p>
+
+      <div class="repay-visual">
+        <div class="repay-row">
+          <div class="repay-label">Day 1</div>
+          <div class="repay-bar"><div class="repay-fill" style="--w:100%"></div></div>
+          <div class="repay-amount">£300</div>
+        </div>
+        <div class="repay-row">
+          <div class="repay-label">Day 30</div>
+          <div class="repay-bar"><div class="repay-fill delay1" style="--w:33%"></div></div>
+          <div class="repay-amount">£100</div>
+        </div>
+        <div class="repay-row">
+          <div class="repay-label">Day 60</div>
+          <div class="repay-bar"><div class="repay-fill delay2" style="--w:33%"></div></div>
+          <div class="repay-amount">£100</div>
+        </div>
+        <div class="repay-row">
+          <div class="repay-label">Day 90</div>
+          <div class="repay-bar"><div class="repay-fill" style="--w:33%;animation-delay:.6s"></div></div>
+          <div class="repay-amount">£100</div>
+        </div>
+      </div>
+
+      <div class="fee-note">
+        💡 One flat fee of <strong>£36</strong> — that's it. No APR surprises.
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:24px">
+        <div style="font-size:0.6rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.25);margin-bottom:12px">Why panda beats alternatives</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.78rem;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
+            <span style="color:rgba(255,255,255,0.5)">Bank overdraft</span>
+            <span style="color:#f87171;font-weight:600;font-size:0.7rem">~40% APR</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.78rem;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
+            <span style="color:rgba(255,255,255,0.5)">Credit card</span>
+            <span style="color:#f87171;font-weight:600;font-size:0.7rem">~29% APR</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.78rem;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
+            <span style="color:rgba(255,255,255,0.5)">Klarna / BNPL</span>
+            <span style="color:#f59e0b;font-weight:600;font-size:0.7rem">Variable</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.78rem;padding:8px 0;background:rgba(61,190,108,0.06);border-radius:8px;padding:10px 12px;margin-top:4px">
+            <span style="color:var(--white);font-weight:600">🐼 Panda</span>
+            <span style="color:var(--g);font-weight:700;font-size:0.75rem">Flat 12%</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:rgba(61,190,108,0.06);border:1px solid rgba(61,190,108,0.15);border-radius:16px;padding:20px">
+        <div style="font-size:2rem;margin-bottom:8px">🏆</div>
+        <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;color:var(--white);margin-bottom:4px">230 people already waiting</div>
+        <div style="font-size:0.75rem;color:rgba(255,255,255,0.35);line-height:1.6">Across 20+ UK universities. 94.8% want early access. 69.6% want ambassador roles.</div>
+        <a href="/waitlist" class="btn-primary" style="display:inline-block;margin-top:14px;font-size:0.82rem;padding:12px 24px">Join the waitlist →</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ BOTTOM CTA ═══ -->
+<section id="bottom-cta">
+  <div class="bottom-cta-inner">
+    <h2 class="reveal">
+      Stop checking<br/>
+      your balance.<br/>
+      <span class="serif">Just live.</span>
+    </h2>
+    <p class="reveal">Panda launches in 2026. Get on the waitlist and be first in line for your £300.</p>
+    <div class="cta-group reveal">
+      <a href="/waitlist" class="btn-primary" style="font-size:1rem;padding:18px 40px">Join the Waitlist →</a>
+      <a href="/panda-game" class="btn-secondary">
+        🐼 Play the game first
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </div>
+    <div style="margin-top:32px;font-size:0.68rem;color:rgba(255,255,255,0.18);letter-spacing:0.06em">
+      FCA Regulated · Powered by SteadyPay · Mastercard Network · Zero balance sheet risk
+    </div>
+  </div>
+</section>
+
+<script>
+// ── CURSOR
+const cur = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  cur.style.left=mx+'px';cur.style.top=my+'px';
+});
+function animRing(){
+  rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;
+  ring.style.left=rx+'px';ring.style.top=ry+'px';
+  requestAnimationFrame(animRing);
+}
+animRing();
+
+// hover states
+document.querySelectorAll('a,button,.step-card,.venue-pill').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{
+    cur.style.width='20px';cur.style.height='20px';
+    ring.style.width='52px';ring.style.height='52px';
+    ring.style.borderColor='rgba(61,190,108,0.8)';
+  });
+  el.addEventListener('mouseleave',()=>{
+    cur.style.width='12px';cur.style.height='12px';
+    ring.style.width='36px';ring.style.height='36px';
+    ring.style.borderColor='rgba(61,190,108,0.5)';
+  });
+});
+
+// ── BACKGROUND CANVAS
+const canvas=document.getElementById('bg-canvas');
+const ctx=canvas.getContext('2d');
+let W,H,particles=[];
+
+function resizeCanvas(){
+  W=canvas.width=canvas.offsetWidth;
+  H=canvas.height=canvas.offsetHeight;
+}
+resizeCanvas();
+window.addEventListener('resize',()=>{resizeCanvas();initParticles()});
+
+function initParticles(){
+  particles=[];
+  const count=Math.floor((W*H)/14000);
+  for(let i=0;i<count;i++){
+    particles.push({
+      x:Math.random()*W,y:Math.random()*H,
+      r:Math.random()*1.5+0.3,
+      vx:(Math.random()-.5)*0.2,
+      vy:(Math.random()-.5)*0.2,
+      o:Math.random()*0.4+0.05,
+      pulse:Math.random()*Math.PI*2,
+    });
+  }
+}
+initParticles();
+
+function drawCanvas(){
+  ctx.clearRect(0,0,W,H);
+
+  // grid lines
+  ctx.strokeStyle='rgba(61,190,108,0.025)';
+  ctx.lineWidth=1;
+  const gs=80;
+  for(let x=0;x<W;x+=gs){
+    ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();
+  }
+  for(let y=0;y<H;y+=gs){
+    ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();
+  }
+
+  // particles
+  particles.forEach(p=>{
+    p.x+=p.vx;p.y+=p.vy;
+    p.pulse+=0.02;
+    if(p.x<0)p.x=W;if(p.x>W)p.x=0;
+    if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+    const alpha=p.o*(0.6+Math.sin(p.pulse)*0.4);
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(61,190,108,${alpha})`;
+    ctx.fill();
+  });
+
+  // connection lines
+  for(let i=0;i<particles.length;i++){
+    for(let j=i+1;j<particles.length;j++){
+      const dx=particles[i].x-particles[j].x;
+      const dy=particles[i].y-particles[j].y;
+      const d=Math.sqrt(dx*dx+dy*dy);
+      if(d<100){
+        ctx.strokeStyle=`rgba(61,190,108,${0.06*(1-d/100)})`;
+        ctx.lineWidth=.5;
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x,particles[i].y);
+        ctx.lineTo(particles[j].x,particles[j].y);
+        ctx.stroke();
+      }
+    }
+  }
+  requestAnimationFrame(drawCanvas);
+}
+drawCanvas();
+
+// ── CARD 3D TILT
+const cardWrap=document.getElementById('card-wrap');
+const heroEl=document.getElementById('hero');
+heroEl.addEventListener('mousemove',e=>{
+  const r=heroEl.getBoundingClientRect();
+  const cx=r.left+r.width/2;
+  const cy=r.top+r.height/2;
+  const dx=(e.clientX-cx)/(r.width/2);
+  const dy=(e.clientY-cy)/(r.height/2);
+  cardWrap.style.transform=`translate(-50%,-50%) rotateY(${dx*12}deg) rotateX(${-dy*8}deg)`;
+});
+heroEl.addEventListener('mouseleave',()=>{
+  cardWrap.style.transform='translate(-50%,-50%) rotateY(0deg) rotateX(0deg)';
+});
+
+// ── STATS COUNT UP
+function countUp(el,target,dur=1800){
+  let start=0;
+  const step=timestamp=>{
+    if(!start)start=timestamp;
+    const p=Math.min((timestamp-start)/dur,1);
+    const ease=1-Math.pow(1-p,4);
+    el.textContent=Math.floor(ease*target)+(target===230?'+':target===20?'+':'');
+    if(p<1)requestAnimationFrame(step);
+    else el.textContent=target+(target===230?'+':target===20?'+':'');
+  };
+  requestAnimationFrame(step);
+}
+
+const statsObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      document.querySelectorAll('[data-count]').forEach(el=>{
+        countUp(el,parseInt(el.dataset.count));
+      });
+      statsObs.disconnect();
+    }
+  });
+},{threshold:.5});
+const statsEl=document.querySelector('.hero-stats');
+if(statsEl)statsObs.observe(statsEl);
+
+// ── SCROLL REVEAL
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}
+  });
+},{threshold:.15});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
